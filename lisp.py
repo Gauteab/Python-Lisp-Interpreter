@@ -25,8 +25,10 @@ def parse(tokens) -> list:
         except: return tree
 
 
-#def eval(lisp):
-    #if isinstance(lisp, list): return eval(lisp)
+def eval(lisp):
+    if isinstance(lisp, list):
+        for l in lisp:
+            return eval(l)
 
 
 def main():
