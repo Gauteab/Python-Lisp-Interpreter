@@ -1,4 +1,6 @@
 from re import match
+from functools import reduce
+import operator
 
 
 def tokenize(filename):
@@ -6,9 +8,9 @@ def tokenize(filename):
 
 
 def lex(s):
-    if   s in ('(', ')'):       return s
-    elif match(r'".*"', s):     return ("string", s[1:-1])
-    elif match(r'[0-9]+', s):   return ("number", int(s))
+    if   s in ('(', ')', 'let'): return s
+    elif match(r'".*"', s):      return ("string", s[1:-1])
+    elif match(r'[0-9]+', s):    return ("number", int(s))
     return ("name", s)
 
 
@@ -25,16 +27,26 @@ def parse(tokens) -> list:
         except: return tree
 
 
-def eval(lisp):
-    if isinstance(lisp, list):
-        for l in lisp:
-            return eval(l)
+def eval(lisp, scope):
+
+    if not isinstance(lisp, list):
+        return lisp[1]
+
+    f = scope[lisp[0][1]]
+    args = [eval(x, scope) for x in lisp[1:]]
+    return f(args)
 
 
 def main():
+    scope = {
+        'print': lambda xs: print(''.join(str(x) for x in xs)),
+        '+':     lambda xs: reduce(operator.add, xs)
+    }
     tokens = tokenize("hello.lisp")
     for x in parse(tokens):
-        print(x)
+        eval(x, scope)
 
 if __name__ == "__main__":
     main()
+
+
