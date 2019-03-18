@@ -29,8 +29,12 @@ def parse(tokens) -> list:
 
 def eval(lisp, scope):
 
-    if not isinstance(lisp, list):
-        return lisp[1]
+    if isinstance(lisp, tuple):
+        return lisp[1] if lisp[0] != 'name' else scope[lisp[1]]
+
+    if lisp[0] == 'let':
+        scope.update({lisp[1][1]:lisp[2][1]})
+        return None
 
     f = scope[lisp[0][1]]
     args = [eval(x, scope) for x in lisp[1:]]
