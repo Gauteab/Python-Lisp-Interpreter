@@ -1,9 +1,7 @@
 
-(let zero? 
-  (fn (x)
-      (if x 
-        0
-        1)))
+(let zero? (fn (x) (if x 0 1)))
+
+(let nil? (fn (x) (= x nil)))
 
 (let cons 
   (fn (x y)
@@ -32,8 +30,6 @@
         (begin
           (print (head l))
           (print-list (tail l))))))
-
-(let nil? (fn (x) (= x nil)))
 
 (let reduce
   (fn (f i xs)

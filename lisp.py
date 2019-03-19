@@ -1,6 +1,7 @@
 from re import match
 from functools import reduce
 import operator
+import sys
 
 #########
 # Lexer #
@@ -58,15 +59,11 @@ def eval(lisp, scope):
 # Core Library #
 ################
 def fn(args, body, scope):
-    args = [x[1] for x in args]
-    return lambda xs: eval(body,
-                           {**scope, **dict(zip(args,xs))})
+    return lambda xs: eval(body, {**scope, **dict(zip([x[1] for x in args], xs))})
 
 def lisp_if(test, hit, miss, scope):
-    if (eval(test, scope) != 0):
-        return eval(hit, scope)
-    else:
-        return eval(miss, scope)
+    if (eval(test, scope) != 0): return eval(hit, scope)
+    else:                        return eval(miss, scope)
 
 def begin(xs, scope):
     r = None
@@ -77,7 +74,8 @@ def begin(xs, scope):
 ###########################
 # Main                    #
 ###########################
-def main():
+def main(filename):
+
     scope = {
         'println':  lambda xs: print(''.join(str(x) for x in xs), end=" \n" ),
         'print':    lambda xs: print(''.join(str(x) for x in xs), end=" "),
@@ -88,12 +86,12 @@ def main():
         '%':        lambda xs: reduce(operator.mod, xs),
         '=':        lambda xs: reduce(operator.eq, xs),
     }
-    tokens = tokenize("hello.lisp")
+
+    tokens = tokenize(filename)
     for x in parse(tokens):
         eval(x, scope)
 
-
 if __name__ == "__main__":
-    main()
-
+    filename = sys.argv[1]
+    main(filename)
 
