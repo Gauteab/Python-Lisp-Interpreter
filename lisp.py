@@ -50,9 +50,7 @@ def eval(lisp, scope):
     if lisp[0] == 'if':
         return lisp_if(lisp[1], lisp[2], lisp[3], scope)
 
-    f = scope[lisp[0][1]]
-    args = [eval(x, scope) for x in lisp[1:]]
-    return f(args)
+    return scope[lisp[0][1]]((eval(x, scope) for x in lisp[1:]))
 
 
 ################
@@ -65,6 +63,7 @@ def lisp_if(test, hit, miss, scope):
     if (eval(test, scope) != 0): return eval(hit, scope)
     else:                        return eval(miss, scope)
 
+# TODO: Might not need to be a special form
 def begin(xs, scope):
     r = None
     for x in xs:
