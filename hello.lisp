@@ -1,10 +1,15 @@
 
-( print "Hello" "World" )
+(print "Hello" "World")
 
-( print ( + 1 2 3 ) )
+(let a 5)
 
-( let a 5 )
+(let b (+ a 5))
 
-( print a )
+(print b)
 
-( print ( + a ( + 1 a ) ) )
+(let f (fn (x) (+ 1 x)))
+
+(print (f (+ 1 2 3)))
+
+(print (- 2 1 1)) 
+
