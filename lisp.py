@@ -7,11 +7,13 @@ import sys
 #                                Lexer                                #
 #######################################################################
 
+KEYWORDS = set(['(', ')', '[', ']', '{', '}', 'let', 'fn', 'nil', 'if'])
+
 def tokenize(filename):
     return (lex(s) for s in open(filename).read().replace('(', ' ( ').replace(')',' ) ').split())
 
 def lex(s: str) -> (str, str):
-    if   s in ('(', ')', 'let', 'fn', 'if', 'nil', 'begin'): return s
+    if   s in (KEYWORDS): return s
     elif match(r'".*"', s):   return ("string", s[1:-1])
     elif match(r'[0-9]+', s): return ("number", int(s))
     return ("name", s)
@@ -23,9 +25,9 @@ def lex(s: str) -> (str, str):
 def parse(tokens) -> list:
     tree = []
     t = next(tokens)
-    while t:
-        if t == ')': return tree
-        if t == '(': tree.append(parse(tokens))
+    while True:
+        if t in (')', ']', '}'): return tree
+        if t in ('(', '[', '{'): tree.append(parse(tokens))
         else:        tree.append(t)
         try:    t = next(tokens)
         except: return tree
@@ -48,7 +50,7 @@ def eval(lisp, scope):
         return fn(lisp[1], lisp[2:], scope)
 
     if lisp[0] == 'if':
-        return eval(lisp[2], scope) if eval(lisp[1], scope) != 0 else eval(lisp[3], scope)
+        return eval(lisp[2] if eval(lisp[1], scope) != 0 else lisp[3], scope)
 
     return scope[lisp[0][1]]((eval(x, scope) for x in lisp[1:]))
 

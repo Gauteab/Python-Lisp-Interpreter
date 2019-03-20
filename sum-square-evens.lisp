@@ -57,7 +57,7 @@
 (let square (fn (x) (* x x)))
 
 (let sum-square-evens
-  (fn (xs)
+  (fn [xs]
       (reduce + 0
       (map square
       (filter even? xs)))))
