@@ -3,9 +3,10 @@ from functools import reduce
 import operator
 import sys
 
-#########
-# Lexer #
-#########
+#######################################################################
+#                                Lexer                                #
+#######################################################################
+
 def tokenize(filename):
     return (lex(s) for s in open(filename).read().replace('(', ' ( ').replace(')',' ) ').split())
 
@@ -15,9 +16,10 @@ def lex(s: str) -> (str, str):
     elif match(r'[0-9]+', s): return ("number", int(s))
     return ("name", s)
 
-##########
-# Parser #
-##########
+#######################################################################
+#                               Parser                                #
+#######################################################################
+
 def parse(tokens) -> list:
     tree = []
     t = next(tokens)
@@ -28,9 +30,10 @@ def parse(tokens) -> list:
         try:    t = next(tokens)
         except: return tree
 
-###############
-# Interpreter #
-###############
+#######################################################################
+#                             Interpreter                             #
+#######################################################################
+
 def eval(lisp, scope):
 
     if lisp == 'nil': return 'nil'
@@ -38,41 +41,30 @@ def eval(lisp, scope):
     if isinstance(lisp, tuple):
         return lisp[1] if lisp[0] != 'name' else scope[lisp[1]]
 
-    if lisp[0] == 'begin':
-        return begin(lisp[1:], scope)
-
     if lisp[0] == 'let':
         return scope.update({lisp[1][1]:eval(lisp[2], scope)})
 
     if lisp[0] == 'fn':
-        return fn(lisp[1], lisp[2], scope)
+        return fn(lisp[1], lisp[2:], scope)
 
     if lisp[0] == 'if':
-        return lisp_if(lisp[1], lisp[2], lisp[3], scope)
+        return eval(lisp[2], scope) if eval(lisp[1], scope) != 0 else eval(lisp[3], scope)
 
     return scope[lisp[0][1]]((eval(x, scope) for x in lisp[1:]))
 
-
-################
-# Core Library #
-################
 def fn(args, body, scope):
-    return lambda xs: eval(body, {**scope, **dict(zip([x[1] for x in args], xs))})
+    def begin(body, scope):
+        r = None
+        for x in body:
+            r = eval(x, scope)
+        return r
 
-def lisp_if(test, hit, miss, scope):
-    if (eval(test, scope) != 0): return eval(hit, scope)
-    else:                        return eval(miss, scope)
+    return lambda xs: begin(body, {**scope, **dict(zip([x[1] for x in args], xs))})
 
-# TODO: Might not need to be a special form
-def begin(xs, scope):
-    r = None
-    for x in xs:
-        r = eval(x, scope)
-    return r
+#######################################################################
+#                                Main                                 #
+#######################################################################
 
-###########################
-# Main                    #
-###########################
 def main(filename):
 
     scope = {
